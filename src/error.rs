@@ -85,6 +85,13 @@ impl From<ClientError> for Error {
     }
 }
 
+#[cfg(feature = "openssl-tls")]
+impl From<openssl::error::ErrorStack> for Error {
+    fn from(source: openssl::error::ErrorStack) -> Self {
+        Error::OpenSSL { source }
+    }
+}
+
 /// A client-facing error.
 #[derive(Debug, Clone, Serialize)]
 pub enum ClientError {

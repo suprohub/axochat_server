@@ -5,6 +5,8 @@ mod error;
 mod message;
 mod moderation;
 
+use std::{fs::File, io::BufReader};
+
 use config::Config;
 use error::*;
 use log::*;
@@ -20,7 +22,6 @@ use uuid::Uuid;
 use {
     rustls::ServerConfig,
     rustls_pemfile::{certs, pkcs8_private_keys},
-    std::{fs::File, io::BufReader},
 };
 
 #[cfg(feature = "openssl-tls")]
@@ -136,7 +137,6 @@ async fn start_server(config: Config) -> Result<()> {
             use std::mem;
             let config_ptr = Box::into_raw(Box::new(config));
             let actix_rustls_config = unsafe { mem::transmute(config_ptr) };
-
             server = server.bind_rustls(address, unsafe { *Box::from_raw(actix_rustls_config) })?;
         }
 

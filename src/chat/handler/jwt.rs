@@ -28,7 +28,6 @@ impl ChatServer {
                         return;
                     }
                 };
-
                 session.addr.do_send(ClientPacket::NewJWT { token });
             } else {
                 info!("User `{}` tried to get JWT but is not logged in.", user_id);

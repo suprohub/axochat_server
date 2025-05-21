@@ -26,7 +26,6 @@ impl Actor for Session {
         // Updated approach that avoids borrowing issues with ctx
         let addr = self.addr.clone();
         let recipient = ctx.address().recipient();
-
         // Use a proper async spawn that avoids borrowing ctx in the async block
         ctx.wait(
             async move { addr.send(Connect::new(recipient)).await }

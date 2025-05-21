@@ -57,7 +57,6 @@ impl ChatServer {
             let uuid = info.uuid;
             let userid_for_closure = user_id;
             let session_addr = session.addr.clone();
-
             // Spawn a Future that performs the authentication
             ctx.spawn(
                 async move { authenticate(&name, &session_hash).await }

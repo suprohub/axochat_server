@@ -92,7 +92,6 @@ pub struct Authenticator {
 impl Authenticator {
     pub fn new(cfg: &AuthConfig) -> Result<Authenticator> {
         let key_data = fs::read(&cfg.key_file)?;
-
         Ok(Authenticator {
             validation: Validation::new(cfg.algorithm),
             header: Header::new(cfg.algorithm),
