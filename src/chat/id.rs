@@ -1,11 +1,8 @@
-use actix::{
-    dev::{MessageResponse, ResponseChannel},
-    *,
-};
+use actix::{dev::MessageResponse, *};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[serde(transparent)]
 pub struct InternalId(u64);
 
@@ -26,9 +23,13 @@ where
     A: Actor,
     M: Message<Result = InternalId>,
 {
-    fn handle<R: ResponseChannel<M>>(self, _: &mut A::Context, tx: Option<R>) {
+    fn handle(
+        self,
+        _: &mut <A as Actor>::Context,
+        tx: Option<dev::OneshotSender<<M as Message>::Result>>,
+    ) {
         if let Some(tx) = tx {
-            tx.send(self);
+            tx.send(self).expect("Error when sending InternalId");
         }
     }
 }

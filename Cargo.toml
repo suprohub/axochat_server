@@ -2,35 +2,45 @@
 name = "axochat"
 version = "0.10.0"
 authors = ["frozolotl <frozolotl@protonmail.com>"]
-edition = "2018"
+edition = "2024"
 license = "MIT"
 
 [features]
-default = ["ssl"]
-
-ssl = ["openssl", "actix-web/ssl"]
-rust-tls = ["rustls", "actix-web/rust-tls"]
+default = ["rustls-tls"]
+rustls-tls = ["dep:rustls", "dep:rustls-pemfile", "actix-web/rustls"]
+openssl-tls = ["dep:openssl", "actix-web/openssl"]
 
 [dependencies]
 log = "0.4"
-env_logger = "0.6"
-structopt = "0.2"
+env_logger = "0.11"
+structopt = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-toml = "0.5"
-humantime = "1.2"
-rand = "0.7"
-rand_hc = "0.2"
-uuid = { version = "0.7", features = ["serde", "u128"] }
-derive_more = "0.15.0"
-snafu = "0.4"
+toml = "0.8"
+humantime = "2.2"
+rand = "0.9"
+rand_hc = "0.4"
+uuid = { version = "1.16", features = ["serde"] }
+derive_more = "2.0"
+snafu = "0.8"
 
-openssl = { version = "0.10", features = ["v110"], optional = true }
-rustls = { version = "0.15", optional = true }
-ring = "0.14"
-jsonwebtoken = "6.0"
-actix-web = "1.0"
-actix-web-actors = "1.0"
-actix = "0.8"
-futures = "0.1"
-url = "1.7"
+
+# Updated web framework and related dependencies
+actix-web = { version = "4.3", features = ["cookies"] }
+actix-web-actors = "4.3"
+actix = "0.13"
+futures = "0.3"
+
+
+# Authentication
+jsonwebtoken = "9.3"
+ring = "0.17"
+
+# TLS support
+rustls-pemfile = { version = "2.2", optional = true }
+rustls = { version = "0.23", optional = true }
+openssl = { version = "0.10", features = ["v111"], optional = true }
+
+# Url
+url = "2.5"
+awc = "3.7"

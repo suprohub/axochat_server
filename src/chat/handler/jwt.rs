@@ -22,36 +22,25 @@ impl ChatServer {
                     Ok(token) => token,
                     Err(err) => {
                         warn!("Could not create new token for user `{}`: {}", user_id, err);
-                        session
-                            .addr
-                            .do_send(ClientPacket::Error {
-                                message: ClientError::Internal,
-                            })
-                            .ok();
+                        session.addr.do_send(ClientPacket::Error {
+                            message: ClientError::Internal,
+                        });
                         return;
                     }
                 };
 
-                if let Err(err) = session.addr.do_send(ClientPacket::NewJWT { token }) {
-                    warn!("Could not send mojang info to user `{}`: {}", user_id, err);
-                }
+                session.addr.do_send(ClientPacket::NewJWT { token });
             } else {
                 info!("User `{}` tried to get JWT but is not logged in.", user_id);
-                session
-                    .addr
-                    .do_send(ClientPacket::Error {
-                        message: ClientError::NotLoggedIn,
-                    })
-                    .ok();
+                session.addr.do_send(ClientPacket::Error {
+                    message: ClientError::NotLoggedIn,
+                });
             }
         } else {
             info!("User `{}` tried to request not supported JWT", user_id);
-            session
-                .addr
-                .do_send(ClientPacket::Error {
-                    message: ClientError::NotSupported,
-                })
-                .ok();
+            session.addr.do_send(ClientPacket::Error {
+                message: ClientError::NotSupported,
+            });
         }
     }
 
@@ -82,30 +71,23 @@ impl ChatServer {
                         uuid: info.uuid,
                         allow_messages,
                     });
-                    if let Err(err) = session.addr.do_send(ClientPacket::Success {
+
+                    session.addr.do_send(ClientPacket::Success {
                         reason: SuccessReason::Login,
-                    }) {
-                        info!("Could not send login success to `{}`: {}", user_id, err);
-                    }
+                    });
                 }
                 Err(err) => {
                     info!("Login of user `{}` using JWT failed: {}", user_id, err);
-                    session
-                        .addr
-                        .do_send(ClientPacket::Error {
-                            message: ClientError::LoginFailed,
-                        })
-                        .ok();
+                    session.addr.do_send(ClientPacket::Error {
+                        message: ClientError::LoginFailed,
+                    });
                 }
             };
         } else {
             info!("User `{}` tried to request not supported JWT", user_id);
-            session
-                .addr
-                .do_send(ClientPacket::Error {
-                    message: ClientError::NotSupported,
-                })
-                .ok();
+            session.addr.do_send(ClientPacket::Error {
+                message: ClientError::NotSupported,
+            });
         }
     }
 }

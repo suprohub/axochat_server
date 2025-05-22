@@ -10,19 +10,19 @@ use crate::error::*;
 use log::*;
 
 use actix::*;
-use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::{HttpRequest, HttpResponse, web};
 use actix_web_actors::ws;
 use serde::{Deserialize, Serialize};
 
 use crate::auth::{Authenticator, UserInfo};
 use crate::message::{MessageValidator, RateLimiter};
 use crate::moderation::Moderation;
-use rand::{rngs::OsRng, SeedableRng};
+use rand::SeedableRng;
 use rand_hc::Hc128Rng;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
-pub fn chat_route(
+pub async fn chat_route(
     req: HttpRequest,
     stream: web::Payload,
     srv: web::Data<Addr<ChatServer>>,
@@ -53,11 +53,11 @@ impl ChatServer {
             connections: HashMap::new(),
             users: HashMap::new(),
 
-            rng: Hc128Rng::from_rng(OsRng).expect("could not initialize hc128 rng"),
+            rng: Hc128Rng::from_rng(&mut rand::rng()),
             authenticator: config
                 .auth
                 .as_ref()
-                .map(|auth| Authenticator::new(&auth).expect("could not initialize authenticator")),
+                .map(|auth| Authenticator::new(auth).expect("could not initialize authenticator")),
             validator: MessageValidator::new(config.message.clone()),
             moderation: Moderation::new(config.moderation.clone())
                 .expect("could not start moderation"),
@@ -92,7 +92,7 @@ impl Handler<Disconnect> for ChatServer {
     }
 }
 
-pub(self) struct SessionState {
+struct SessionState {
     addr: Recipient<ClientPacket>,
     session_hash: Option<String>,
     user: Option<User>,
@@ -110,12 +110,14 @@ struct UserSession {
 }
 
 #[derive(Message)]
+#[rtype(result = "()")]
 struct Disconnect {
     id: InternalId,
 }
 
 /// A clientbound packet
 #[derive(Message, Serialize, Clone)]
+#[rtype(result = "()")]
 #[serde(tag = "m", content = "c")]
 enum ClientPacket {
     MojangInfo {
@@ -146,6 +148,7 @@ enum ClientPacket {
 
 /// A serverbound packet
 #[derive(Message, Deserialize)]
+#[rtype(result = "()")]
 #[serde(tag = "m", content = "c")]
 enum ServerPacket {
     RequestMojangInfo,
@@ -160,6 +163,7 @@ enum ServerPacket {
 }
 
 #[derive(Message)]
+#[rtype(result = "()")]
 struct ServerPacketId {
     user_id: InternalId,
     packet: ServerPacket,

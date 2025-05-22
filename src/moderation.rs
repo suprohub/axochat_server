@@ -34,13 +34,13 @@ impl Moderation {
         if self.is_moderator(user) {
             Err(ClientError::NotPermitted.into())
         } else {
-            if self.banned.insert(user.clone()) {
+            if self.banned.insert(*user) {
                 let mut file = OpenOptions::new()
                     .append(true)
                     .create(true)
                     .open(&self.config.banned)?;
 
-                writeln!(file, "{}", user.to_hyphenated())?;
+                writeln!(file, "{}", user.hyphenated())?;
             }
 
             Ok(())
@@ -80,7 +80,8 @@ fn read_ids(path: &Path) -> Result<HashSet<Uuid>> {
     for line in reader.lines() {
         let line = line?;
         if !line.is_empty() {
-            lines.insert(line.parse()?);
+            // todo
+            lines.insert(line.parse().unwrap());
         }
     }
     Ok(lines)

@@ -1,9 +1,9 @@
 use crate::error::*;
 use jsonwebtoken::Algorithm;
 use serde::{
+    Deserialize, Serialize,
     de::{self, Deserializer, Visitor},
     ser::Serializer,
-    Deserialize, Serialize,
 };
 use std::{
     env, fmt,
@@ -151,7 +151,7 @@ impl<'de> Deserialize<'de> for WDuration {
     {
         struct IdVisitor;
 
-        impl<'de> Visitor<'de> for IdVisitor {
+        impl Visitor<'_> for IdVisitor {
             type Value = WDuration;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

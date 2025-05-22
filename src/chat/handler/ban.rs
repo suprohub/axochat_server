@@ -22,12 +22,9 @@ impl ChatServer {
         if let Some(info) = &session.user {
             if !self.moderation.is_moderator(&info.uuid) {
                 info!("`{}` tried to (un-)ban user without permission", user_id);
-                session
-                    .addr
-                    .do_send(ClientPacket::Error {
-                        message: ClientError::NotPermitted,
-                    })
-                    .ok();
+                session.addr.do_send(ClientPacket::Error {
+                    message: ClientError::NotPermitted,
+                });
                 return;
             }
 
@@ -45,34 +42,26 @@ impl ChatServer {
                         info!("User `{}` unbanned.", receiver);
                         SuccessReason::Unban
                     };
-                    let _ = session.addr.do_send(ClientPacket::Success { reason });
+                    session.addr.do_send(ClientPacket::Success { reason });
                 }
                 Err(Error::AxoChat { source }) => {
                     info!("Could not (un-)ban user `{}`: {}", receiver, source);
                     session
                         .addr
-                        .do_send(ClientPacket::Error { message: source })
-                        .ok();
+                        .do_send(ClientPacket::Error { message: source });
                 }
                 Err(err) => {
                     info!("Could not (un-)ban user `{}`: {}", receiver, err);
-                    session
-                        .addr
-                        .do_send(ClientPacket::Error {
-                            message: ClientError::Internal,
-                        })
-                        .ok();
+                    session.addr.do_send(ClientPacket::Error {
+                        message: ClientError::Internal,
+                    });
                 }
             }
         } else {
             info!("`{}` is not logged in.", user_id);
-            session
-                .addr
-                .do_send(ClientPacket::Error {
-                    message: ClientError::NotLoggedIn,
-                })
-                .ok();
-            return;
+            session.addr.do_send(ClientPacket::Error {
+                message: ClientError::NotLoggedIn,
+            });
         }
     }
 }
