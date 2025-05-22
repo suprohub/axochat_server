@@ -1,0 +1,3 @@
+[toolchain]
+# We use stable rust.
+channel = "stable"
