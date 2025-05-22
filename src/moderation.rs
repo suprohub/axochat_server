@@ -80,8 +80,7 @@ fn read_ids(path: &Path) -> Result<HashSet<Uuid>> {
     for line in reader.lines() {
         let line = line?;
         if !line.is_empty() {
-            // todo
-            lines.insert(line.parse().unwrap());
+            lines.insert(line.parse()?);
         }
     }
     Ok(lines)

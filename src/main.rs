@@ -45,7 +45,7 @@ enum Opt {
 
 #[actix_web::main]
 async fn main() -> Result<()> {
-    env_logger::init();
+    simple_logger::init().map_err(|err| Error::Logger { source: err })?;
 
     let config = config::read_config()?;
     debug!("Read configuration file: {:?}", config);
@@ -117,7 +117,11 @@ async fn start_server(config: Config) -> Result<()> {
             // Load certificate chain and key
             let cert_chain = certs(&mut cert_file).map(|cert| cert.unwrap()).collect();
 
-            let Some(Ok(key)) = pkcs8_private_keys(&mut key_file).next() else {
+            let Some(key) = pkcs8_private_keys(&mut key_file)
+                .next()
+                .transpose()
+                .map_err(|err| Error::IO { source: err })?
+            else {
                 return Err(Error::RustTLSNoMsg);
             };
 
@@ -125,7 +129,7 @@ async fn start_server(config: Config) -> Result<()> {
             let config = ServerConfig::builder()
                 .with_no_client_auth()
                 .with_single_cert(cert_chain, PrivateKeyDer::Pkcs8(key))
-                .map_err(|_| Error::RustTLSNoMsg)?;
+                .map_err(|err| Error::RustTLS { source: err })?;
 
             // Special hack to make rustls versions compatible with actix-web
             // We use unsafe to cast our ServerConfig to the version expected by actix-web

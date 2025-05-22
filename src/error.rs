@@ -1,3 +1,4 @@
+use log::SetLoggerError;
 use serde::Serialize;
 use snafu::Snafu;
 use std::{error, fmt, io};
@@ -20,7 +21,7 @@ pub enum Error {
     OpenSSL { source: openssl::error::ErrorStack },
     #[cfg(feature = "rustls-tls")]
     #[snafu(display("rustls: {}", source))]
-    RustTLS { source: std::io::Error },
+    RustTLS { source: rustls::Error },
     #[cfg(feature = "rustls-tls")]
     #[snafu(display("rustls"))]
     RustTLSNoMsg,
@@ -30,6 +31,8 @@ pub enum Error {
     Uuid { source: uuid::Error },
     #[snafu(display("axochat: {}", source))]
     AxoChat { source: ClientError },
+    #[snafu(display("Logger: {}", source))]
+    Logger { source: SetLoggerError },
 }
 
 // Manually implement From traits to avoid conflicts

@@ -2,3 +2,5 @@
 **/*.rs.bk
 axochat.toml
 .config
+banned.txt
+moderators.txt
